@@ -33,7 +33,7 @@ const PorteriaView: React.FC<PorteriaViewProps> = ({ conjuntoInfo, conjuntoName 
         return;
       }
 
-      const response = await fetch('/api/notifications/solicitar-autorizacion', {
+      const response = await fetch('/api/notifications?action=solicitar-autorizacion', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

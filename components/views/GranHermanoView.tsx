@@ -29,7 +29,7 @@ const GranHermanoView: React.FC<GranHermanoViewProps> = ({ userProfile }) => {
 
   const fetchMetrics = async () => {
     try {
-      const response = await fetch('/api/gran-hermano/metrics');
+      const response = await fetch('/api/gran-hermano?action=metrics');
       if (response.ok) {
         const data = await response.json();
         setMetrics(data.stats);
@@ -47,7 +47,7 @@ const GranHermanoView: React.FC<GranHermanoViewProps> = ({ userProfile }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const response = await fetch('/api/agents/trigger-diagnostic', {
+      const response = await fetch('/api/agents?action=trigger-diagnostic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

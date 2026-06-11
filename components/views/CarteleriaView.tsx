@@ -20,7 +20,7 @@ const CarteleriaView: React.FC<CarteleriaViewProps> = ({ userProfile, conjuntoIn
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const response = await fetch('/api/carteleria/create-content', {
+      const response = await fetch('/api/carteleria?action=create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

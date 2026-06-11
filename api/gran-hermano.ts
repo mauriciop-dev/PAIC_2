@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { validateUserSession } from '../../lib/auth/validate-conjunto';
-import { supabaseAdmin } from '../../lib/supabaseAdmin';
+import { validateUserSession } from '../lib/auth/validate-conjunto';
+import { supabaseAdmin } from '../lib/supabaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -13,10 +13,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = await validateUserSession(req.headers.authorization);
   if (!session) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
-  if (req.method === 'GET') {
+  const action = (req.query.action as string) || '';
+
+  if (action === 'metrics') {
+    const [agents, alerts, health] = await Promise.all([
+      supabaseAdmin.from('agent_registry').select('*').order('nombre'),
+      supabaseAdmin.from('agent_alerts').select('*').eq('resuelta', false).order('created_at', { ascending: false }).limit(50),
+      supabaseAdmin.from('health_reports').select('*').order('created_at', { ascending: false }).limit(10),
+    ]);
+
+    res.status(200).json({
+      timestamp: new Date().toISOString(),
+      agents: agents.data || [],
+      activeAlerts: alerts.data || [],
+      recentHealthReports: health.data || [],
+      stats: {
+        totalAgents: agents.data?.length || 0,
+        onlineAgents: agents.data?.filter((a) => a.estado === 'online').length || 0,
+        activeAlerts: alerts.data?.length || 0,
+        criticalAlerts: alerts.data?.filter((a) => a.severidad === 'critica').length || 0,
+      },
+    });
+    return;
+  }
+
+  if (action === 'alerts-list') {
     const { resuelta, severidad } = req.query;
-    let query = supabaseAdmin
-      .from('agent_alerts')
+    let query = supabaseAdmin.from('agent_alerts')
       .select('*, agent_registry(nombre, tipo)')
       .order('created_at', { ascending: false })
       .limit(100);
@@ -31,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (req.method === 'POST') {
+  if (action === 'alerts-resolve') {
     const { alertId } = req.body;
     if (!alertId) { res.status(400).json({ error: 'alertId required' }); return; }
 
@@ -45,5 +68,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.status(405).json({ error: 'Method not allowed' });
+  res.status(400).json({ error: 'Invalid action' });
 }

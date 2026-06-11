@@ -32,7 +32,7 @@ const AlertCenter: React.FC = () => {
   const fetchAlerts = async () => {
     try {
       const params = filter === 'active' ? '?resuelta=false' : '';
-      const response = await fetch(`/api/gran-hermano/alerts${params}`);
+      const response = await fetch(`/api/gran-hermano?action=alerts-list${params}`);
       if (response.ok) {
         setAlerts(await response.json());
       }
@@ -45,7 +45,7 @@ const AlertCenter: React.FC = () => {
 
   const resolveAlert = async (alertId: string) => {
     try {
-      const response = await fetch('/api/gran-hermano/alerts', {
+      const response = await fetch('/api/gran-hermano?action=alerts-resolve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ alertId }),

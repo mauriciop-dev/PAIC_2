@@ -36,7 +36,7 @@ const AgentStatus: React.FC = () => {
 
   const fetchAgents = async () => {
     try {
-      const response = await fetch('/api/agents/status');
+      const response = await fetch('/api/agents?action=status');
       if (response.ok) {
         const data = await response.json();
         setAgents(data);

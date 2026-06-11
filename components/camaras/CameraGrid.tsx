@@ -27,7 +27,7 @@ const CameraGrid: React.FC<CameraGridProps> = ({ conjuntoId }) => {
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch('/api/camaras/lpr-events');
+      const response = await fetch('/api/camaras?action=lpr-list');
       setCameras([]);
     } catch {
       // Placeholder — API returns LPR events not cameras

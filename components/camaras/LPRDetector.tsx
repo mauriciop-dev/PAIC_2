@@ -17,7 +17,7 @@ const LPRDetector: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/camaras/lpr-events');
+        const response = await fetch('/api/camaras?action=lpr-list');
         if (response.ok) {
           const data = await response.json();
           setEvents(data);

@@ -57,7 +57,7 @@ const ComunicacionWebRTC: React.FC<ComunicacionWebRTCProps> = ({ callId, role, o
           const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
 
-          await fetch('/api/citofonia/signal', {
+          await fetch('/api/citofonia?action=signal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ callId, type: 'offer', sdp: offer.sdp }),
