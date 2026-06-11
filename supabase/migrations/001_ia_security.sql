@@ -50,3 +50,14 @@ CREATE POLICY "Admins manage their conjunto's IA config" ON ia_config
       WHERE user_profiles.id = auth.uid()
     )
   );
+
+-- Helper function to log chatbot interactions
+CREATE OR REPLACE FUNCTION log_chatbot_interaction(p_conjunto_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+BEGIN
+  INSERT INTO ia_usage (conjunto_id, prompt_tokens, completion_tokens, model_used, executed_tool)
+  VALUES (p_conjunto_id, 0, 0, 'interaction_log', 'chatbot_interaction');
+END;
+$$;
