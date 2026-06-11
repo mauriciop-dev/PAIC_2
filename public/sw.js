@@ -48,8 +48,8 @@ self.addEventListener('push', (event) => {
     const options = {
       title: data.title || 'PAIC',
       body: data.body || '',
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png',
+      icon: '/icons/icon-192x192.svg',
+      badge: '/icons/icon-192x192.svg',
       tag: data.tag || 'default',
       requireInteraction: true,
       actions: data.actions || [],
