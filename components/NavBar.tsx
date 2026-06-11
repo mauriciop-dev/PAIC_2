@@ -1,7 +1,8 @@
 
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Tab, UserProfile, UserRole } from '../types';
+import { Tab, UserProfile } from '../types';
+import { mapUserRole, canAccessTab, isConjuntoAdmin as checkIsAdminRole } from '../lib/auth/verify-permissions';
 import { Icon } from './ui/Icon';
 import { apiService } from '../services/apiService';
 import { SettingsTab } from '../App';
@@ -14,15 +15,15 @@ interface NavBarProps {
 }
 
 const allTabs = [
-  { id: Tab.Dashboard, label: 'Centro de Control', icon: 'dashboard', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.Database, label: 'Base de datos', icon: 'database', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.CommonAreas, label: 'Áreas comunes', icon: 'calendar', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.Comunicaciones, label: 'Comunicaciones', icon: 'mail', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.Archivos, label: 'Archivos', icon: 'file-text', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.Finanzas, label: 'Finanzas', icon: 'dollarSign', roles: [UserRole.Trial, UserRole.Subscriber, UserRole.Internal] }, // Example: Internal could be an accountant
-  { id: Tab.Seguridad, label: 'Seguridad', icon: 'shield', roles: [UserRole.Trial, UserRole.Subscriber, UserRole.Internal] },
-  { id: Tab.DueDates, label: 'Vencimientos', icon: 'clock', roles: [UserRole.Trial, UserRole.Subscriber] },
-  { id: Tab.PendingTasks, label: 'Tareas', icon: 'checkSquare', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.Dashboard, label: 'Centro de Control', icon: 'dashboard' },
+  { id: Tab.Database, label: 'Base de datos', icon: 'database' },
+  { id: Tab.CommonAreas, label: 'Áreas comunes', icon: 'calendar' },
+  { id: Tab.Comunicaciones, label: 'Comunicaciones', icon: 'mail' },
+  { id: Tab.Archivos, label: 'Archivos', icon: 'file-text' },
+  { id: Tab.Finanzas, label: 'Finanzas', icon: 'dollarSign' },
+  { id: Tab.Seguridad, label: 'Seguridad', icon: 'shield' },
+  { id: Tab.DueDates, label: 'Vencimientos', icon: 'clock' },
+  { id: Tab.PendingTasks, label: 'Tareas', icon: 'checkSquare' },
 ];
 
 const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, userProfile, onSettingsClick }) => {
@@ -32,17 +33,16 @@ const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, userProfile, o
   const visibleTabs = useMemo(() => {
     if (!userProfile) return [];
 
-    if (userProfile.role === UserRole.Internal) {
-        if (userProfile.permissions && userProfile.permissions.length > 0) {
-            return allTabs.filter(tab => userProfile.permissions!.includes(tab.id));
-        }
-        return [];
+    const platformRole = mapUserRole(userProfile.role);
+
+    if (platformRole === 'internal' && userProfile.permissions && userProfile.permissions.length > 0) {
+        return allTabs.filter(tab => userProfile.permissions!.includes(tab.id));
     }
 
-    return allTabs.filter(tab => tab.roles.includes(userProfile.role));
+    return allTabs.filter(tab => canAccessTab(platformRole, tab.id));
   }, [userProfile]);
 
-  const isConjuntoAdmin = userProfile.role === UserRole.Trial || userProfile.role === UserRole.Subscriber;
+  const isConjuntoAdmin = checkIsAdminRole(mapUserRole(userProfile.role));
 
   useEffect(() => {
     if (!isConjuntoAdmin || !userProfile.conjuntoId) return;

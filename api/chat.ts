@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { validateUserSession } from '../lib/auth/validate-conjunto';
 import { buildSystemPrompt } from '../lib/ai/system-instruction-builder';
 import { callAI } from '../lib/ai/gemini-backend';
-import { HIDDEN_TOOLS_SPEC } from '../lib/ai/occulted-tools';
+import { HIDDEN_TOOLS_SPEC, TOOL_IMPLEMENTATION_MAP } from '../lib/ai/occulted-tools';
 import { executeToolLocally } from '../lib/ai/tool-executor';
 import { supabaseAdmin } from '../lib/supabaseAdmin';
 
@@ -121,10 +121,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.warn('Failed to log IA usage:', err);
     }
 
-    // 8. If AI requested a tool call, execute it locally (bypass frontend exposure)
+    // 8. If AI requested a tool call, resolve the obfuscated name and execute locally
     if (toolCalls && toolCalls.length > 0) {
       const toolCall = toolCalls[0];
-      const toolResult = await executeToolLocally(toolCall.name, toolCall.args, conjuntoId);
+      const resolvedName = TOOL_IMPLEMENTATION_MAP[toolCall.name] || toolCall.name;
+      const toolResult = await executeToolLocally(resolvedName, toolCall.args, conjuntoId);
       
       res.status(200).json({
         message: toolResult,

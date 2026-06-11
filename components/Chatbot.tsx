@@ -3,6 +3,7 @@ import { Message, UserProfile, ConjuntoInfo } from '../types';
 import { Icon } from './ui/Icon';
 import { chatService } from '../services/chatService';
 import { marked } from 'marked';
+import ChatInput from './chat/ChatInput';
 
 // A simple renderer component defined within the Chatbot component file
 // It uses the 'marked' library to parse markdown and Tailwind's prose classes for styling.
@@ -31,39 +32,18 @@ interface ChatbotProps {
 
 const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, userProfile, conjuntoInfo }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (userProfile && conjuntoInfo && messages.length === 0 && isOpen) {
         setMessages([
-            // FIX: Property 'name' does not exist on type 'UserProfile'. Use 'fullName' instead.
             { sender: 'ai', text: `Hola **${userProfile.fullName}**, soy PAIC y te ayudaré a administrar **${conjuntoInfo.name}**.\n\n¿En qué te puedo ayudar hoy?\n\n1. Base de datos\n2. Áreas comunes\n3. Comunicaciones\n4. Finanzas\n5. Seguridad\n6. Vencimientos\n7. Tareas\n\nPuedes elegir una opción o escribir tu solicitud.` }
         ]);
     } else if (!isOpen) {
-        // Clear messages when chatbot is closed to ensure it re-initializes with the welcome message
         setMessages([]);
     }
   }, [userProfile, conjuntoInfo, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      // Set a timeout to focus the input after the panel transition is complete
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 300); // Corresponds to the transition duration
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-  
-  // Re-focus the input after the AI has responded
-  useEffect(() => {
-    if (!isLoading && isOpen) {
-        inputRef.current?.focus();
-    }
-  }, [isLoading, isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -73,22 +53,18 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, userProfile, conju
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (input.trim() === '' || isLoading) return;
+  const handleSend = async (text: string) => {
+    if (isLoading) return;
 
-    const userMessage: Message = { sender: 'user', text: input };
+    const userMessage: Message = { sender: 'user', text };
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = input;
-    setInput('');
     setIsLoading(true);
 
     try {
-      // Send the current message along with the chat history for full context
-      const aiResponseText = await chatService.runChat(currentInput, messages);
+      const aiResponseText = await chatService.runChat(text, messages);
       const aiMessage: Message = { sender: 'ai', text: aiResponseText };
       setMessages(prev => [...prev, aiMessage]);
 
-       // If the response indicates a successful action (not an error or clarification), notify other components.
       if (aiResponseText.toLowerCase().includes('confirmado') || aiResponseText.toLowerCase().includes('exitosamente')) {
           window.dispatchEvent(new CustomEvent('data-changed'));
       }
@@ -157,33 +133,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, userProfile, conju
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
-        <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                }
-            }}
-            placeholder="Escribe tu mensaje o elige una opción..."
-            className="flex-1 bg-transparent p-2 text-sm text-gray-800 focus:outline-none resize-none"
-            rows={1}
-            disabled={isLoading}
-          />
-          <button
-            onClick={handleSend}
-            disabled={isLoading || input.trim() === ''}
-            className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
-            aria-label="Send message"
-          >
-            <Icon name="send" className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
+      <ChatInput onSend={handleSend} isLoading={isLoading} />
     </aside>
   );
 };

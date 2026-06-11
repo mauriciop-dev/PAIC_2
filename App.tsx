@@ -10,6 +10,7 @@ import SettingsModal from './components/SettingsModal';
 import LoginView from './components/views/LoginView';
 import SuperAdminDashboard from './components/views/SuperAdminDashboard';
 import { Tab, UserProfile, ConjuntoInfo, UserRole, SuperAdminProfile, PackageLog, PlatformUser } from './types';
+import { mapUserRole, isConjuntoAdmin as checkIsAdminRole } from './lib/auth/verify-permissions';
 import { Icon } from './components/ui/Icon';
 import AccessPointSelectionModal from './components/AccessPointSelectionModal';
 import { apiService } from './services/apiService';
@@ -18,6 +19,7 @@ import NotificationToast from './components/ui/NotificationToast';
 import { fromSupabase } from './utils/dbMappers';
 import { Session } from '@supabase/supabase-js';
 import OnboardingGuide from './components/OnboardingGuide';
+import CommandPalette from './components/CommandPalette';
 
 interface LoginError {
   title: string;
@@ -44,6 +46,7 @@ const App: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [initialSettingsTab, setInitialSettingsTab] = useState<SettingsTab>('Perfil');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const handleLogout = useCallback(async () => {
     supabase.removeAllChannels();
@@ -70,6 +73,21 @@ const App: React.FC = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+  // Keyboard shortcut: Ctrl+K to open command palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (userProfile && (checkIsAdminRole(mapUserRole(userProfile.role)) || mapUserRole(userProfile.role) === 'internal')) {
+          setIsCommandPaletteOpen(prev => !prev);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [userProfile]);
 
   // Effect #1: Runs ONCE on mount. Its only job is to get the initial session
   // and set up the listener. It is the single source of truth for the session state.
@@ -133,10 +151,10 @@ const App: React.FC = () => {
                     if (cancelled) return;
                     if (info) {
                         setConjuntoInfo(info);
-                    } else if (profile.role === UserRole.Trial || profile.role === UserRole.Subscriber) {
+                    } else if (checkIsAdminRole(mapUserRole(profile.role))) {
                         setIsInitialSetupModalOpen(true);
                     }
-                } else if (profile.role === UserRole.Trial || profile.role === UserRole.Subscriber) {
+                } else if (checkIsAdminRole(mapUserRole(profile.role))) {
                     setIsInitialSetupModalOpen(true);
                 }
             } else {
@@ -203,7 +221,7 @@ const App: React.FC = () => {
   }, [userProfile, conjuntoInfo]);
 
   useEffect(() => {
-      if (userProfile && (userProfile.role === UserRole.Trial || userProfile.role === UserRole.Subscriber) && userProfile.conjuntoId) {
+      if (userProfile && checkIsAdminRole(mapUserRole(userProfile.role)) && userProfile.conjuntoId) {
           const channel = supabase
               .channel('package-notifications')
               .on(
@@ -230,8 +248,8 @@ const App: React.FC = () => {
   // Effect for onboarding
   useEffect(() => {
     if (userProfile && !isLoadingSession) {
-      const isConjuntoAdmin = userProfile.role === UserRole.Trial || userProfile.role === UserRole.Subscriber;
-      if (isConjuntoAdmin) {
+      const isAdminRole = checkIsAdminRole(mapUserRole(userProfile.role));
+      if (isAdminRole) {
         const onboardingCompleted = localStorage.getItem(`onboardingCompleted-${userProfile.id}`);
         if (!onboardingCompleted) {
             setShowOnboarding(true);
@@ -344,7 +362,7 @@ const App: React.FC = () => {
       );
   }
 
-  if (userProfile && userProfile.role === UserRole.Admin) {
+  if (userProfile && mapUserRole(userProfile.role) === 'superadmin') {
       const superAdminProfile: SuperAdminProfile = { name: userProfile.fullName, email: userProfile.email, role: UserRole.Admin };
       return <SuperAdminDashboard profile={superAdminProfile} onLogout={handleLogout} />;
   }
@@ -354,7 +372,7 @@ const App: React.FC = () => {
   }
   
   const conjuntoName = conjuntoInfo?.name || "Conjunto Residencial";
-  const isConjuntoAdmin = userProfile.role === UserRole.Trial || userProfile.role === UserRole.Subscriber;
+  const isConjuntoAdmin = checkIsAdminRole(mapUserRole(userProfile.role));
   const needsAdminSetup = isConjuntoAdmin && !conjuntoInfo;
 
   return (
@@ -426,6 +444,15 @@ const App: React.FC = () => {
       )}
       
       <OnboardingGuide isOpen={showOnboarding} onClose={handleOnboardingComplete} />
+      
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        userProfile={userProfile}
+        onNavigate={(tab) => setActiveTab(tab)}
+        onOpenChat={() => setIsChatbotOpen(true)}
+        onOpenSettings={() => handleSettingsClick()}
+      />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { apiService } from '../../services/apiService';
 // FIX: Imported missing types to resolve reference errors and improve type safety.
 import { ChartData, DashboardSummary, NotificationItem, Tab, UserProfile, DueDate, Task, PackageLog, IncomeCategory, ExpenseCategory, VisitorLog, AccessPoint } from '../../types';
 import { Icon } from '../ui/Icon';
+import AIHealthWidget from '../AIHealthWidget';
 
 interface DashboardViewProps {
     setActiveTab: (tab: Tab) => void;
@@ -375,6 +376,11 @@ const DashboardView: React.FC<DashboardViewProps> = ({ setActiveTab, userProfile
 
   return (
     <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <AIHealthWidget />
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div onMouseEnter={(e) => handleMouseEnter(stats.residentsInDebt.details, e)} onMouseLeave={handleMouseLeave}>
                 <StatCard title="Residentes en Mora" value={stats.residentsInDebt.count} icon="users" iconColor="bg-red-500" />
