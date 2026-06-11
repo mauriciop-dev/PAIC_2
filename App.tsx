@@ -11,6 +11,8 @@ import LoginView from './components/views/LoginView';
 import SuperAdminDashboard from './components/views/SuperAdminDashboard';
 import { Tab, UserProfile, ConjuntoInfo, UserRole, SuperAdminProfile, PackageLog, PlatformUser } from './types';
 import { mapUserRole, isConjuntoAdmin as checkIsAdminRole } from './lib/auth/verify-permissions';
+import PorteriaView from './components/views/PorteriaView';
+import ResidenteView from './components/views/ResidenteView';
 import { Icon } from './components/ui/Icon';
 import AccessPointSelectionModal from './components/AccessPointSelectionModal';
 import { apiService } from './services/apiService';
@@ -372,8 +374,24 @@ const App: React.FC = () => {
   }
   
   const conjuntoName = conjuntoInfo?.name || "Conjunto Residencial";
-  const isConjuntoAdmin = checkIsAdminRole(mapUserRole(userProfile.role));
+  const platformRole = mapUserRole(userProfile.role);
+  const isConjuntoAdmin = checkIsAdminRole(platformRole);
   const needsAdminSetup = isConjuntoAdmin && !conjuntoInfo;
+
+  if (platformRole === 'portero') {
+    return <PorteriaView conjuntoInfo={conjuntoInfo} conjuntoName={conjuntoName} />;
+  }
+
+  if (platformRole === 'residente') {
+    return (
+      <ResidenteView
+        userId={userProfile.id}
+        conjuntoId={userProfile.conjuntoId || ''}
+        conjuntoName={conjuntoName}
+        onOpenChat={() => setIsChatbotOpen(true)}
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen font-sans text-gray-800 bg-gray-50">
