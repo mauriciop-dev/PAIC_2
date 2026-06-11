@@ -1,28 +1,29 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
-import Dashboard from './components/Dashboard';
 import NavBar from './components/NavBar';
-import Chatbot from './components/Chatbot';
-import HelpModal from './components/HelpModal';
-import InitialSetupModal from './components/InitialSetupModal';
-import SettingsModal from './components/SettingsModal';
 import LoginView from './components/views/LoginView';
-import SuperAdminDashboard from './components/views/SuperAdminDashboard';
 import { Tab, UserProfile, ConjuntoInfo, UserRole, SuperAdminProfile, PackageLog, PlatformUser } from './types';
 import { mapUserRole, isConjuntoAdmin as checkIsAdminRole } from './lib/auth/verify-permissions';
-import PorteriaView from './components/views/PorteriaView';
-import ResidenteView from './components/views/ResidenteView';
 import { Icon } from './components/ui/Icon';
-import AccessPointSelectionModal from './components/AccessPointSelectionModal';
 import { apiService } from './services/apiService';
 import { supabase } from './services/supabaseClient';
 import NotificationToast from './components/ui/NotificationToast';
 import { fromSupabase } from './utils/dbMappers';
 import { Session } from '@supabase/supabase-js';
-import OnboardingGuide from './components/OnboardingGuide';
 import CommandPalette from './components/CommandPalette';
 import ServiceWorkerRegister from './components/pwa/ServiceWorkerRegister';
+
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Chatbot = lazy(() => import('./components/Chatbot'));
+const HelpModal = lazy(() => import('./components/HelpModal'));
+const InitialSetupModal = lazy(() => import('./components/InitialSetupModal'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
+const SuperAdminDashboard = lazy(() => import('./components/views/SuperAdminDashboard'));
+const PorteriaView = lazy(() => import('./components/views/PorteriaView'));
+const ResidenteView = lazy(() => import('./components/views/ResidenteView'));
+const AccessPointSelectionModal = lazy(() => import('./components/AccessPointSelectionModal'));
+const OnboardingGuide = lazy(() => import('./components/OnboardingGuide'));
 
 interface LoginError {
   title: string;
@@ -367,7 +368,7 @@ const App: React.FC = () => {
 
   if (userProfile && mapUserRole(userProfile.role) === 'superadmin') {
       const superAdminProfile: SuperAdminProfile = { name: userProfile.fullName, email: userProfile.email, role: UserRole.Admin };
-      return <SuperAdminDashboard profile={superAdminProfile} onLogout={handleLogout} />;
+      return <Suspense fallback={<div className="flex h-screen items-center justify-center"><Icon name="bot" className="w-12 h-12 text-blue-600 animate-pulse" /></div>}><SuperAdminDashboard profile={superAdminProfile} onLogout={handleLogout} /></Suspense>;
   }
 
   if (!userProfile) {
@@ -380,17 +381,19 @@ const App: React.FC = () => {
   const needsAdminSetup = isConjuntoAdmin && !conjuntoInfo;
 
   if (platformRole === 'portero') {
-    return <PorteriaView conjuntoInfo={conjuntoInfo} conjuntoName={conjuntoName} />;
+    return <Suspense fallback={<div className="flex h-screen items-center justify-center"><Icon name="bot" className="w-12 h-12 text-blue-600 animate-pulse" /></div>}><PorteriaView conjuntoInfo={conjuntoInfo} conjuntoName={conjuntoName} /></Suspense>;
   }
 
   if (platformRole === 'residente') {
     return (
-      <ResidenteView
-        userId={userProfile.id}
-        conjuntoId={userProfile.conjuntoId || ''}
-        conjuntoName={conjuntoName}
-        onOpenChat={() => setIsChatbotOpen(true)}
-      />
+      <Suspense fallback={<div className="flex h-screen items-center justify-center"><Icon name="bot" className="w-12 h-12 text-blue-600 animate-pulse" /></div>}>
+        <ResidenteView
+          userId={userProfile.id}
+          conjuntoId={userProfile.conjuntoId || ''}
+          conjuntoName={conjuntoName}
+          onOpenChat={() => setIsChatbotOpen(true)}
+        />
+      </Suspense>
     );
   }
 
@@ -400,7 +403,7 @@ const App: React.FC = () => {
       <NotificationToast message={notification} onClose={() => setNotification(null)} />
       
       {isConjuntoAdmin && (
-          <Chatbot isOpen={isChatbotOpen} setIsOpen={setIsChatbotOpen} userProfile={userProfile} conjuntoInfo={conjuntoInfo} />
+          <Suspense fallback={null}><Chatbot isOpen={isChatbotOpen} setIsOpen={setIsChatbotOpen} userProfile={userProfile} conjuntoInfo={conjuntoInfo} /></Suspense>
       )}
       
       {isConjuntoAdmin && (
@@ -432,38 +435,44 @@ const App: React.FC = () => {
                 </p>
             </div>
           ) : (
-            <Dashboard activeTab={activeTab} setActiveTab={setActiveTab} conjuntoName={conjuntoName} userProfile={userProfile} conjuntoInfo={conjuntoInfo} selectedAccessPointId={selectedAccessPointId} />
+            <Suspense fallback={<div className="text-center p-10 text-gray-600">Cargando vista...</div>}><Dashboard activeTab={activeTab} setActiveTab={setActiveTab} conjuntoName={conjuntoName} userProfile={userProfile} conjuntoInfo={conjuntoInfo} selectedAccessPointId={selectedAccessPointId} /></Suspense>
           )}
         </div>
       </main>
 
-      {isHelpModalOpen && <HelpModal onClose={() => setIsHelpModalOpen(false)} onStartTour={() => { setIsHelpModalOpen(false); setShowOnboarding(true); }} />}
+      {isHelpModalOpen && <Suspense fallback={null}><HelpModal onClose={() => setIsHelpModalOpen(false)} onStartTour={() => { setIsHelpModalOpen(false); setShowOnboarding(true); }} /></Suspense>}
       
       {isInitialSetupModalOpen && (
-        <InitialSetupModal 
-            onClose={() => setIsInitialSetupModalOpen(false)} 
-            onSaveSetup={handleSaveSetup} 
-            userProfile={userProfile}
-        />
+        <Suspense fallback={null}>
+          <InitialSetupModal 
+              onClose={() => setIsInitialSetupModalOpen(false)} 
+              onSaveSetup={handleSaveSetup} 
+              userProfile={userProfile}
+          />
+        </Suspense>
       )}
       
       {isSettingsModalOpen && isConjuntoAdmin && conjuntoInfo && (
-          <SettingsModal 
-            isOpen={isSettingsModalOpen} 
-            onClose={() => setIsSettingsModalOpen(false)} 
-            userProfile={userProfile} 
-            conjuntoInfo={conjuntoInfo} 
-            initialTab={initialSettingsTab}
-            setConjuntoInfo={setConjuntoInfo}
-            setUserProfile={setUserProfile}
-          />
+          <Suspense fallback={null}>
+            <SettingsModal 
+              isOpen={isSettingsModalOpen} 
+              onClose={() => setIsSettingsModalOpen(false)} 
+              userProfile={userProfile} 
+              conjuntoInfo={conjuntoInfo} 
+              initialTab={initialSettingsTab}
+              setConjuntoInfo={setConjuntoInfo}
+              setUserProfile={setUserProfile}
+            />
+          </Suspense>
       )}
       
        {isAccessPointModalOpen && userProfile.conjuntoId && (
-        <AccessPointSelectionModal isOpen={isAccessPointModalOpen} onClose={() => setIsAccessPointModalOpen(false)} conjuntoId={userProfile.conjuntoId} onSelect={setSelectedAccessPointId} />
+        <Suspense fallback={null}>
+          <AccessPointSelectionModal isOpen={isAccessPointModalOpen} onClose={() => setIsAccessPointModalOpen(false)} conjuntoId={userProfile.conjuntoId} onSelect={setSelectedAccessPointId} />
+        </Suspense>
       )}
       
-      <OnboardingGuide isOpen={showOnboarding} onClose={handleOnboardingComplete} />
+      <Suspense fallback={null}><OnboardingGuide isOpen={showOnboarding} onClose={handleOnboardingComplete} /></Suspense>
       
       <CommandPalette
         isOpen={isCommandPaletteOpen}

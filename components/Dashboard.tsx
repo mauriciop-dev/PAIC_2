@@ -1,18 +1,19 @@
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Tab, UserProfile, ConjuntoInfo } from '../types';
-import DashboardView from './views/DashboardView';
-import DatabaseView from './views/DatabaseView';
-import CommonAreasView from './views/CommonAreasView';
-import DueDatesView from './views/DueDatesView';
-import PendingTasksView from './views/PendingTasksView';
-import ComunicacionesView from './views/ComunicacionesView';
-import ArchivosView from './views/ArchivosView';
-import FinanzasView from './views/FinanzasView';
-import SeguridadView from './views/SeguridadView';
-import CamarasView from './views/CamarasView';
-import CarteleriaView from './views/CarteleriaView';
-import GranHermanoView from './views/GranHermanoView';
+
+const DashboardView = lazy(() => import('./views/DashboardView'));
+const DatabaseView = lazy(() => import('./views/DatabaseView'));
+const CommonAreasView = lazy(() => import('./views/CommonAreasView'));
+const DueDatesView = lazy(() => import('./views/DueDatesView'));
+const PendingTasksView = lazy(() => import('./views/PendingTasksView'));
+const ComunicacionesView = lazy(() => import('./views/ComunicacionesView'));
+const ArchivosView = lazy(() => import('./views/ArchivosView'));
+const FinanzasView = lazy(() => import('./views/FinanzasView'));
+const SeguridadView = lazy(() => import('./views/SeguridadView'));
+const CamarasView = lazy(() => import('./views/CamarasView'));
+const CarteleriaView = lazy(() => import('./views/CarteleriaView'));
+const GranHermanoView = lazy(() => import('./views/GranHermanoView'));
 
 interface DashboardProps {
   activeTab: Tab;
@@ -61,7 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab, conjunto
     }
   };
 
-  return <div className="w-full h-full">{renderContent()}</div>;
+  return <div className="w-full h-full"><Suspense fallback={<div className="text-center p-10 text-gray-600">Cargando...</div>}>{renderContent()}</Suspense></div>;
 };
 
 export default Dashboard;
