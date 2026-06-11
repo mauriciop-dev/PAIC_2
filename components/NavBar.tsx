@@ -1,0 +1,173 @@
+
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { Tab, UserProfile, UserRole } from '../types';
+import { Icon } from './ui/Icon';
+import { apiService } from '../services/apiService';
+import { SettingsTab } from '../App';
+
+interface NavBarProps {
+  activeTab: Tab;
+  setActiveTab: (tab: Tab) => void;
+  userProfile: UserProfile;
+  onSettingsClick: (tab?: SettingsTab) => void;
+}
+
+const allTabs = [
+  { id: Tab.Dashboard, label: 'Centro de Control', icon: 'dashboard', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.Database, label: 'Base de datos', icon: 'database', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.CommonAreas, label: 'Áreas comunes', icon: 'calendar', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.Comunicaciones, label: 'Comunicaciones', icon: 'mail', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.Archivos, label: 'Archivos', icon: 'file-text', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.Finanzas, label: 'Finanzas', icon: 'dollarSign', roles: [UserRole.Trial, UserRole.Subscriber, UserRole.Internal] }, // Example: Internal could be an accountant
+  { id: Tab.Seguridad, label: 'Seguridad', icon: 'shield', roles: [UserRole.Trial, UserRole.Subscriber, UserRole.Internal] },
+  { id: Tab.DueDates, label: 'Vencimientos', icon: 'clock', roles: [UserRole.Trial, UserRole.Subscriber] },
+  { id: Tab.PendingTasks, label: 'Tareas', icon: 'checkSquare', roles: [UserRole.Trial, UserRole.Subscriber] },
+];
+
+const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, userProfile, onSettingsClick }) => {
+  const [sliderItems, setSliderItems] = useState<{ text: string; color: 'red' | 'yellow' | 'green' }[]>([]);
+  const [currentItem, setCurrentItem] = useState(0);
+
+  const visibleTabs = useMemo(() => {
+    if (!userProfile) return [];
+
+    if (userProfile.role === UserRole.Internal) {
+        if (userProfile.permissions && userProfile.permissions.length > 0) {
+            return allTabs.filter(tab => userProfile.permissions!.includes(tab.id));
+        }
+        return [];
+    }
+
+    return allTabs.filter(tab => tab.roles.includes(userProfile.role));
+  }, [userProfile]);
+
+  const isConjuntoAdmin = userProfile.role === UserRole.Trial || userProfile.role === UserRole.Subscriber;
+
+  useEffect(() => {
+    if (!isConjuntoAdmin || !userProfile.conjuntoId) return;
+
+    const updateSliderItems = async () => {
+      const [dueDates, tasks] = await Promise.all([
+        apiService.fetchDueDates(userProfile.conjuntoId!),
+        apiService.fetchTasks(userProfile.conjuntoId!),
+      ]);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const urgentDueDates = dueDates
+        .filter(d => d.status === 'Pendiente' || d.status === 'Vencido')
+        .map(d => {
+          const dueDate = new Date(d.dueDate);
+          const timeDiff = dueDate.getTime() - today.getTime();
+          const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+          let text = '';
+          let color: 'red' | 'yellow' = 'yellow';
+
+          if (d.status === 'Vencido') {
+            text = `VENCIDO: ${d.item} hace ${Math.abs(dayDiff)} día(s)`;
+            color = 'red';
+          } else if (dayDiff <= 3) {
+            text = `PAGO: ${d.item} vence en ${dayDiff} día(s)`;
+            color = 'red';
+          } else {
+            text = `PAGO: ${d.item} vence el ${d.dueDate}`;
+            color = 'yellow';
+          }
+          return { text, color, date: dueDate };
+        });
+      
+      const urgentTasks = tasks
+          .filter(t => !t.completed && t.dueDate)
+          .map(t => {
+              const dueDate = new Date(t.dueDate);
+              const timeDiff = dueDate.getTime() - today.getTime();
+              const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+              
+              let text = `TAREA: ${t.text}`;
+              let color: 'red' | 'yellow' = 'yellow';
+
+              if (dayDiff < 0) {
+                  text += ' (Vencida)';
+                  color = 'red';
+              } else if (dayDiff <= 3) {
+                  text += ` (Vence en ${dayDiff} día(s))`;
+                  color = 'red';
+              }
+              
+              return { text, color, date: dueDate };
+          });
+
+      const staticItems = [
+          { text: "Soporte ProDig - 3144897092", color: 'green' as const, date: new Date(9999,0,1) },
+      ];
+      
+      const allUrgentItems = [...urgentDueDates, ...urgentTasks].sort((a,b) => a.date.getTime() - b.date.getTime());
+
+      const combinedItems = [...allUrgentItems.slice(0, 4), ...staticItems];
+      setSliderItems(combinedItems);
+      setCurrentItem(0);
+    };
+
+    updateSliderItems();
+    
+    const intervalId = setInterval(updateSliderItems, 60000); // Refresh every minute
+    return () => clearInterval(intervalId);
+
+  }, [isConjuntoAdmin, userProfile.conjuntoId]);
+
+  useEffect(() => {
+    if (sliderItems.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentItem((prev) => (prev + 1) % sliderItems.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sliderItems]);
+  
+  const trafficLightColor = sliderItems[currentItem] 
+    ? {
+        red: 'bg-red-500',
+        yellow: 'bg-yellow-500',
+        green: 'bg-green-500',
+      }[sliderItems[currentItem].color] || 'bg-gray-500'
+    : 'bg-gray-500';
+
+  return (
+    <nav id="main-navbar" className="p-2 md:px-4 border-b border-gray-200 bg-white sticky top-[65px] md:top-[77px] z-10 flex justify-between items-center gap-4">
+      <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+        {visibleTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+        {isConjuntoAdmin && (
+             <button
+                onClick={() => onSettingsClick()}
+                className="p-2 rounded-md text-gray-500 hover:bg-gray-100"
+                aria-label="Abrir configuración"
+             >
+                 <Icon name="settings" className="w-5 h-5" />
+             </button>
+        )}
+      </div>
+      {isConjuntoAdmin && sliderItems.length > 0 && (
+          <div className="hidden sm:flex items-center gap-2 overflow-hidden flex-shrink min-w-0">
+             <div className={`w-3 h-3 rounded-full ${trafficLightColor} flex-shrink-0`}></div>
+             <p className="text-sm text-gray-700 truncate">{sliderItems[currentItem].text}</p>
+          </div>
+      )}
+    </nav>
+  );
+};
+
+export default NavBar;
