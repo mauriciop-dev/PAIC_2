@@ -19,6 +19,7 @@ const TAB_PERMISSIONS: Record<PlatformRole, Tab[]> = {
   admin: [
     Tab.Dashboard, Tab.Database, Tab.CommonAreas, Tab.Comunicaciones,
     Tab.Archivos, Tab.Finanzas, Tab.Seguridad, Tab.DueDates, Tab.PendingTasks,
+    Tab.Camaras, Tab.Carteleria, Tab.GranHermano,
   ],
   portero: [
     Tab.Dashboard, Tab.Seguridad,

@@ -10,6 +10,9 @@ import ComunicacionesView from './views/ComunicacionesView';
 import ArchivosView from './views/ArchivosView';
 import FinanzasView from './views/FinanzasView';
 import SeguridadView from './views/SeguridadView';
+import CamarasView from './views/CamarasView';
+import CarteleriaView from './views/CarteleriaView';
+import GranHermanoView from './views/GranHermanoView';
 
 interface DashboardProps {
   activeTab: Tab;
@@ -47,6 +50,12 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab, conjunto
           return <FinanzasView userProfile={userProfile} />;
       case Tab.Seguridad:
           return <SeguridadView userProfile={userProfile} selectedAccessPointId={selectedAccessPointId} />;
+      case Tab.Camaras:
+          return <CamarasView userProfile={userProfile} />;
+      case Tab.Carteleria:
+          return <CarteleriaView userProfile={userProfile} conjuntoInfo={conjuntoInfo} />;
+      case Tab.GranHermano:
+          return <GranHermanoView userProfile={userProfile} />;
       default:
         return <DashboardView setActiveTab={setActiveTab} userProfile={userProfile} />;
     }

@@ -10,6 +10,9 @@ export enum Tab {
   Seguridad = 'Seguridad',
   DueDates = 'Vencimientos',
   PendingTasks = 'Tareas pendientes',
+  Camaras = 'Cámaras',
+  Carteleria = 'Cartelería Digital',
+  GranHermano = 'Gran Hermano',
 }
 
 export enum UserRole {

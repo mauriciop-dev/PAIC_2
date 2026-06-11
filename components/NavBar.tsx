@@ -24,6 +24,9 @@ const allTabs = [
   { id: Tab.Seguridad, label: 'Seguridad', icon: 'shield' },
   { id: Tab.DueDates, label: 'Vencimientos', icon: 'clock' },
   { id: Tab.PendingTasks, label: 'Tareas', icon: 'checkSquare' },
+  { id: Tab.Camaras, label: 'Cámaras', icon: 'camera' },
+  { id: Tab.Carteleria, label: 'Cartelería', icon: 'monitor' },
+  { id: Tab.GranHermano, label: 'Gran Hermano', icon: 'shield' },
 ];
 
 const NavBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, userProfile, onSettingsClick }) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ConjuntoInfo } from '../../types';
 import { Icon } from '../ui/Icon';
 import PushNotificationManager from '../pwa/PushNotificationManager';
+import AutorizadorVisitas from '../citofonia/AutorizadorVisitas';
 
 interface ResidenteViewProps {
   userId: string;
@@ -30,6 +31,7 @@ const ResidenteView: React.FC<ResidenteViewProps> = ({ userId, conjuntoId, conju
       </div>
 
       <PushNotificationManager userId={userId} conjuntoId={conjuntoId} />
+      <AutorizadorVisitas userId={userId} conjuntoId={conjuntoId} />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-3">Notificaciones</h2>

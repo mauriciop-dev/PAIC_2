@@ -22,6 +22,7 @@ import { fromSupabase } from './utils/dbMappers';
 import { Session } from '@supabase/supabase-js';
 import OnboardingGuide from './components/OnboardingGuide';
 import CommandPalette from './components/CommandPalette';
+import ServiceWorkerRegister from './components/pwa/ServiceWorkerRegister';
 
 interface LoginError {
   title: string;
@@ -395,6 +396,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen font-sans text-gray-800 bg-gray-50">
+      <ServiceWorkerRegister />
       <NotificationToast message={notification} onClose={() => setNotification(null)} />
       
       {isConjuntoAdmin && (
