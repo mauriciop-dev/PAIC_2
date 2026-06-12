@@ -280,16 +280,16 @@ const App: React.FC = () => {
     if (!userProfile) return;
     
     try {
-        // 1. Create conjunto info using the new, explicit 'add' function.
-        await apiService.addConjuntoInfo(info);
+        // 1. Create conjunto info (DB auto-generates UUID, returns it)
+        const newConjuntoId = await apiService.addConjuntoInfo(info);
         
         // 2. Update the user's profile with the new conjuntoId
-        const updatedProfile: UserProfile = { ...userProfile, conjuntoId: info.id, fullName: info.adminName };
+        const updatedProfile: UserProfile = { ...userProfile, conjuntoId: newConjuntoId, fullName: info.adminName };
         await apiService.updateUserProfile(updatedProfile);
 
         // 3. Update local state
         setUserProfile(updatedProfile);
-        setConjuntoInfo(info);
+        setConjuntoInfo({ ...info, id: newConjuntoId });
         setIsInitialSetupModalOpen(false);
     } catch (error) {
         console.error("Error saving initial setup:", error);

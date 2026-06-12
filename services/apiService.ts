@@ -77,12 +77,14 @@ export const apiService = {
       throw error;
     }
   },
-  async addConjuntoInfo(conjunto: T.ConjuntoInfo): Promise<void> {
-    const { error } = await insforge.database.from('conjuntos').insert(toSupabase(conjunto));
+  async addConjuntoInfo(conjunto: T.ConjuntoInfo): Promise<string> {
+    const { id, ...dataToInsert } = toSupabase(conjunto);
+    const { data, error } = await insforge.database.from('conjuntos').insert(dataToInsert).select().single();
     if (error) {
       console.error('Error adding conjunto info:', error);
       throw error;
     }
+    return data.id;
   },
 
   // --- Residents ---
