@@ -11,6 +11,7 @@ import { supabase } from './services/supabaseClient';
 import NotificationToast from './components/ui/NotificationToast';
 import { fromSupabase } from './utils/dbMappers';
 import { Session } from '@supabase/supabase-js';
+import { syncAuthSession, clearAuthSession } from './lib/auth/session-sync';
 import CommandPalette from './components/CommandPalette';
 import ServiceWorkerRegister from './components/pwa/ServiceWorkerRegister';
 
@@ -54,7 +55,7 @@ const App: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     supabase.removeAllChannels();
-    await supabase.auth.signOut();
+    await clearAuthSession();
     setUserProfile(null);
     setConjuntoInfo(null);
     setSelectedAccessPointId(null);
@@ -93,26 +94,25 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [userProfile]);
 
-  // Effect #1: Runs ONCE on mount. Its only job is to get the initial session
-  // and set up the listener. It is the single source of truth for the session state.
+  // Effect #1: Runs ONCE on mount. Gets the initial session via InsForge SDK
+  // and syncs it with the Supabase client so DB queries work with RLS.
   useEffect(() => {
-    // Do not run if a config error was already detected from the URL
     const params = new URLSearchParams(window.location.hash.slice(1));
     if (params.get('error_description')) {
         setIsLoadingSession(false);
         return;
     }
 
-    // Supabase's onAuthStateChange listener fires immediately with the current session.
-    // This is more reliable than calling getSession() and setting up the listener separately,
-    // as it avoids race conditions.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-    });
-
-    return () => {
-        subscription?.unsubscribe();
+    const initSession = async () => {
+      const synced = await syncAuthSession();
+      if (synced) {
+        setSession({ user: { id: synced.userId, email: synced.email } as any, access_token: '', refresh_token: '', expires_in: 0, expires_at: 0, token_type: 'bearer' });
+      } else {
+        setSession(null);
+      }
     };
+
+    initSession();
   }, []);
 
   // Effect #2: Runs whenever the `session` state changes. It is responsible for

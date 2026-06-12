@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { insforge } from '../../services/insforgeClient';
 import { Icon } from '../ui/Icon';
 import LoginForm from '../LoginForm';
 import { PlatformUser } from '../../types';
@@ -22,11 +22,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onInternalAuthSuccess }) => {
 
   const handleGoogleSignIn = async () => {
     setError(null);
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await insforge.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
+      redirectTo: window.location.origin,
     });
     if (error) setError(error.message);
   };
