@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         'process.env.SUPABASE_URL': JSON.stringify(env.INSFORGE_URL),
-        'process.env.SUPABASE_ANON_KEY': JSON.stringify(env.INSFORGE_ANON_KEY)
+        'process.env.SUPABASE_ANON_KEY': JSON.stringify(env.INSFORGE_ANON_KEY),
+        'process.env.INSFORGE_URL': JSON.stringify(env.INSFORGE_URL),
+        'process.env.INSFORGE_ANON_KEY': JSON.stringify(env.INSFORGE_ANON_KEY)
       },
       resolve: {
         alias: {
