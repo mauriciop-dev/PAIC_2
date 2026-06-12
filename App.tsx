@@ -106,7 +106,7 @@ const App: React.FC = () => {
     const initSession = async () => {
       const synced = await syncAuthSession();
       if (synced) {
-        setSession({ user: { id: synced.userId, email: synced.email } as any, access_token: '', refresh_token: '', expires_in: 0, expires_at: 0, token_type: 'bearer' });
+        setSession({ user: { id: synced.userId, email: synced.email, fullName: synced.fullName, avatarUrl: synced.avatarUrl } as any, access_token: '', refresh_token: '', expires_in: 0, expires_at: 0, token_type: 'bearer' });
       } else {
         setSession(null);
       }
@@ -162,14 +162,29 @@ const App: React.FC = () => {
                     setIsInitialSetupModalOpen(true);
                 }
             } else {
-                console.error("User is logged in but profile data is missing after retries.");
-                setLoginError({
-                    title: "Error de Sincronización",
-                    message: "No pudimos encontrar tu perfil. Esto puede ser un problema de sincronización. Por favor, refresca la página. Si el problema persiste, contacta a soporte.",
-                    type: 'sync',
-                });
-                setUserProfile(null);
-                setConjuntoInfo(null);
+                // First-time user: create profile with 14-day free trial
+                try {
+                    const newProfile: UserProfile = {
+                        id: session.user.id,
+                        email: session.user.email || '',
+                        fullName: (session.user as any).fullName || session.user.email?.split('@')[0] || 'Usuario',
+                        avatarUrl: (session.user as any).avatarUrl,
+                        role: UserRole.Trial,
+                        trialExpiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    };
+                    await apiService.addUserProfile(newProfile);
+                    setUserProfile(newProfile);
+                    setIsInitialSetupModalOpen(true);
+                } catch (error) {
+                    console.error("Error creating user profile:", error);
+                    setLoginError({
+                        title: "Error al Registrar",
+                        message: "Ocurrió un error al crear tu perfil. Por favor, intenta de nuevo o contacta a soporte.",
+                        type: 'sync',
+                    });
+                    setUserProfile(null);
+                    setConjuntoInfo(null);
+                }
             }
         } catch (error) {
             console.error("Error fetching profile data:", error);

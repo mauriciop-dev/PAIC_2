@@ -29,6 +29,21 @@ export const apiService = {
     }
     return fromSupabase(data) as T.UserProfile;
   },
+  async addUserProfile(profile: T.UserProfile): Promise<void> {
+    const { error } = await supabase.from('user_profiles').insert({
+      id: profile.id,
+      email: profile.email,
+      full_name: profile.fullName,
+      avatar_url: profile.avatarUrl,
+      role: profile.role,
+      trial_expires_at: profile.trialExpiresAt,
+      permissions: profile.permissions || [],
+    });
+    if (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
+  },
   async updateUserProfile(profile: T.UserProfile): Promise<void> {
     const { error } = await supabase.from('user_profiles').update(toSupabase(profile)).eq('id', profile.id);
     if (error) {
