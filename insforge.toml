@@ -1,5 +1,5 @@
 [auth]
-allowed_redirect_urls = ["https://app.paicai.com.co", "http://localhost:5173"]
+allowed_redirect_urls = ["https://app.paicai.com.co", "https://paic-2.vercel.app", "https://paic-*.vercel.app", "http://localhost:5173"]
 require_email_verification = true
 verify_email_method = "code"
 reset_password_method = "code"
