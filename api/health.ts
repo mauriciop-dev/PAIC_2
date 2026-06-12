@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from '../lib/supabaseAdmin';
+import { insforgeAdmin } from '../lib/insforgeAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS configuration
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,11 +19,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let isDegraded = false;
 
-  // 1. Check Database (Insforge/Supabase) connectivity and latency
   try {
     const start = Date.now();
-    const { error } = await supabaseAdmin.from('conjuntos').select('id').limit(1);
-    
+    const { error } = await insforgeAdmin.database.from('conjuntos').select('id').limit(1);
+
     if (error) throw error;
 
     status.services.database = {
@@ -39,7 +37,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
   }
 
-  // 2. Check AI keys configuration
   const hasGemini = !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'PLACEHOLDER_API_KEY';
   const hasGroq = !!process.env.GROQ_API_KEY;
   const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
