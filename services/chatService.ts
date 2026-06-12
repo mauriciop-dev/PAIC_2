@@ -1,10 +1,10 @@
-import { supabase } from './supabaseClient';
+import { insforge } from './insforgeClient';
 import { Message } from '../types';
 
 export const chatService = {
   async runChat(message: string, history: Message[]): Promise<string> {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    const headers = insforge.getHttpClient().getHeaders();
+    const token = headers['Authorization']?.replace('Bearer ', '');
 
     if (!token) {
       throw new Error('No active authenticated session found. Please log in.');
@@ -39,8 +39,8 @@ export const chatService = {
   },
 
   async generateSubject(body: string): Promise<string> {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    const headers = insforge.getHttpClient().getHeaders();
+    const token = headers['Authorization']?.replace('Bearer ', '');
 
     if (!token) {
       throw new Error('No active authenticated session found.');
@@ -68,8 +68,8 @@ export const chatService = {
   },
 
   async improveWriting(body: string): Promise<string> {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    const headers = insforge.getHttpClient().getHeaders();
+    const token = headers['Authorization']?.replace('Bearer ', '');
 
     if (!token) {
       throw new Error('No active authenticated session found.');

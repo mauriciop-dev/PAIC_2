@@ -3,7 +3,7 @@ import { UserProfile } from '../../types';
 import { Icon } from '../ui/Icon';
 import AgentStatus from '../agents/AgentStatus';
 import AlertCenter from '../agents/AlertCenter';
-import { supabase } from '../../services/supabaseClient';
+import { insforge } from '../../services/insforgeClient';
 
 interface GranHermanoViewProps {
   userProfile: UserProfile;
@@ -44,14 +44,15 @@ const GranHermanoView: React.FC<GranHermanoViewProps> = ({ userProfile }) => {
     setDiagnosticResult('');
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const headers = insforge.getHttpClient().getHeaders();
+      const token = headers['Authorization']?.replace('Bearer ', '');
+      if (!token) return;
 
       const response = await fetch('/api/agents?action=trigger-diagnostic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ agentType: 'full_system' }),
       });

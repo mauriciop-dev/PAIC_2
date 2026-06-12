@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ConjuntoInfo } from '../../types';
 import { Icon } from '../ui/Icon';
-import { supabase } from '../../services/supabaseClient';
+import { insforge } from '../../services/insforgeClient';
 
 interface PorteriaViewProps {
   conjuntoInfo: ConjuntoInfo | null;
@@ -26,8 +26,9 @@ const PorteriaView: React.FC<PorteriaViewProps> = ({ conjuntoInfo, conjuntoName 
     setSent(false);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const headers = insforge.getHttpClient().getHeaders();
+      const token = headers['Authorization']?.replace('Bearer ', '');
+      if (!token) {
         setError('Sesión no encontrada');
         setSending(false);
         return;
@@ -37,7 +38,7 @@ const PorteriaView: React.FC<PorteriaViewProps> = ({ conjuntoInfo, conjuntoName 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           visitanteNombre,

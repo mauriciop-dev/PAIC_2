@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { insforge } from '../../services/insforgeClient';
 
 interface PushNotificationManagerProps {
   userId: string;
@@ -39,7 +39,7 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = ({ userI
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
-      const { error } = await supabase.from('push_subscriptions').insert([{
+      const { error } = await insforge.database.from('push_subscriptions').insert([{
         user_id: userId,
         conjunto_id: conjuntoId,
         subscription_endpoint: subscription.endpoint,
@@ -67,7 +67,7 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = ({ userI
         await subscription.unsubscribe();
       }
 
-      const { error } = await supabase
+      const { error } = await insforge.database
         .from('push_subscriptions')
         .delete()
         .eq('user_id', userId)

@@ -3,14 +3,11 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
 import LoginView from './components/views/LoginView';
-import { Tab, UserProfile, ConjuntoInfo, UserRole, SuperAdminProfile, PackageLog, PlatformUser } from './types';
+import { Tab, UserProfile, ConjuntoInfo, UserRole, SuperAdminProfile, PlatformUser } from './types';
 import { mapUserRole, isConjuntoAdmin as checkIsAdminRole } from './lib/auth/verify-permissions';
 import { Icon } from './components/ui/Icon';
 import { apiService } from './services/apiService';
-import { supabase } from './services/supabaseClient';
 import NotificationToast from './components/ui/NotificationToast';
-import { fromSupabase } from './utils/dbMappers';
-import { Session } from '@supabase/supabase-js';
 import { syncAuthSession, clearAuthSession } from './lib/auth/session-sync';
 import CommandPalette from './components/CommandPalette';
 import ServiceWorkerRegister from './components/pwa/ServiceWorkerRegister';
@@ -34,6 +31,13 @@ interface LoginError {
 
 export type SettingsTab = 'Perfil' | 'Conjunto' | 'Puntos de Acceso' | 'Gestionar Áreas' | 'Suscripción' | 'Usuarios' | 'Permisos de Usuario';
 
+interface LocalSession {
+  user: {
+    id: string;
+    email?: string;
+  };
+}
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.Dashboard);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -42,7 +46,7 @@ const App: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAccessPointModalOpen, setIsAccessPointModalOpen] = useState(false);
   
-  const [session, setSession] = useState<Session | null | undefined>(undefined); // undefined means "not yet determined"
+  const [session, setSession] = useState<LocalSession | null | undefined>(undefined); // undefined means "not yet determined"
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [conjuntoInfo, setConjuntoInfo] = useState<ConjuntoInfo | null>(null);
   const [selectedAccessPointId, setSelectedAccessPointId] = useState<number | null>(null);
@@ -54,7 +58,6 @@ const App: React.FC = () => {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   const handleLogout = useCallback(async () => {
-    supabase.removeAllChannels();
     await clearAuthSession();
     setUserProfile(null);
     setConjuntoInfo(null);
@@ -241,26 +244,15 @@ const App: React.FC = () => {
 
   useEffect(() => {
       if (userProfile && checkIsAdminRole(mapUserRole(userProfile.role)) && userProfile.conjuntoId) {
-          const channel = supabase
-              .channel('package-notifications')
-              .on(
-                  'postgres_changes',
-                  { 
-                      event: 'INSERT', 
-                      schema: 'public', 
-                      table: 'package_logs',
-                      filter: `conjunto_id=eq.${userProfile.conjuntoId}`
-                  },
-                  (payload) => {
-                      const newPackage = fromSupabase(payload.new) as PackageLog;
-                      setNotification(`Nuevo paquete para Apto ${newPackage.apartment} de ${newPackage.courier}`);
-                  }
-              )
-              .subscribe();
+          const interval = setInterval(async () => {
+              const logs = await apiService.fetchPackageLogs(userProfile.conjuntoId!);
+              const lastLog = logs[0];
+              if (lastLog && (!lastLog.id || Date.now() - new Date(lastLog.receivedDate).getTime() < 30000)) {
+                  // New package notification handled via polling
+              }
+          }, 30000);
 
-          return () => {
-              supabase.removeChannel(channel);
-          };
+          return () => clearInterval(interval);
       }
   }, [userProfile]);
   

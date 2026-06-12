@@ -3,7 +3,7 @@ import { UserProfile, ConjuntoInfo } from '../../types';
 import CartelEditor from '../cartelera/CartelEditor';
 import CartelPreview from '../cartelera/CartelPreview';
 import ScheduleManager from '../cartelera/ScheduleManager';
-import { supabase } from '../../services/supabaseClient';
+import { insforge } from '../../services/insforgeClient';
 
 interface CarteleriaViewProps {
   userProfile: UserProfile;
@@ -17,14 +17,15 @@ const CarteleriaView: React.FC<CarteleriaViewProps> = ({ userProfile, conjuntoIn
   const handleSave = async (data: { titulo: string; contenido: string; tipo: string; mediaUrl?: string }) => {
     setSaving(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const headers = insforge.getHttpClient().getHeaders();
+      const token = headers['Authorization']?.replace('Bearer ', '');
+      if (!token) return;
 
       const response = await fetch('/api/carteleria?action=create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           titulo: data.titulo,

@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { insforge } from './insforgeClient';
 
 export function withConjuntoFilter<T extends Record<string, any>>(
   table: string,
@@ -9,7 +9,7 @@ export function withConjuntoFilter<T extends Record<string, any>>(
     limit?: number;
   }
 ) {
-  let query = supabase
+  let query = insforge.database
     .from(table)
     .select(options?.select || '*')
     .eq('conjunto_id', conjuntoId);
@@ -32,7 +32,7 @@ export function withConjuntoInsert<T extends Record<string, any>>(
   data: T,
   conjuntoId: string
 ) {
-  return supabase.from(table).insert({
+  return insforge.database.from(table).insert({
     ...data,
     conjunto_id: conjuntoId,
   });
@@ -45,7 +45,7 @@ export function withConjuntoUpdate(
   matchField: string,
   matchValue: string | number
 ) {
-  return supabase
+  return insforge.database
     .from(table)
     .update(data)
     .eq('conjunto_id', conjuntoId)
@@ -58,7 +58,7 @@ export function withConjuntoDelete(
   matchField: string,
   matchValue: string | number
 ) {
-  return supabase
+  return insforge.database
     .from(table)
     .delete()
     .eq('conjunto_id', conjuntoId)
