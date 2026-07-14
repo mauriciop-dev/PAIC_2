@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GridLayout from "react-grid-layout";
+import GridLayout, { getCompactor } from "react-grid-layout";
 import { Users, DollarSign, CreditCard, CheckSquare } from "lucide-react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -19,7 +19,7 @@ export default function DashboardGrid({ stats, loading }: Props) {
   const [currentLayout, setCurrentLayout] = useState(layout);
 
   return (
-    <GridLayout className="layout" layout={currentLayout} cols={6} rowHeight={80} width={1200} onLayoutChange={(l) => setCurrentLayout(l)} isResizable isDraggable compactType="vertical">
+    <GridLayout className="layout" layout={currentLayout} width={1200} gridConfig={{ cols: 6, rowHeight: 80 }} dragConfig={{ enabled: true }} resizeConfig={{ enabled: true }} compactor={getCompactor("vertical")} onLayoutChange={(l) => setCurrentLayout(l)}>
       {STAT_CARDS.map((card) => {
         const Icon = card.icon;
         return (
