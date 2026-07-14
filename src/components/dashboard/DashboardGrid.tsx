@@ -19,7 +19,7 @@ export default function DashboardGrid({ stats, loading }: Props) {
   const [currentLayout, setCurrentLayout] = useState(layout);
 
   return (
-    <GridLayout className="layout" layout={currentLayout} width={1200} gridConfig={{ cols: 6, rowHeight: 80 }} dragConfig={{ enabled: true }} resizeConfig={{ enabled: true }} compactor={getCompactor("vertical")} onLayoutChange={(l) => setCurrentLayout(l)}>
+    <GridLayout className="layout" layout={currentLayout} width={1200} gridConfig={{ cols: 6, rowHeight: 80 }} dragConfig={{ enabled: true }} resizeConfig={{ enabled: true }} compactor={getCompactor("vertical")} onLayoutChange={(l) => setCurrentLayout([...l])}>
       {STAT_CARDS.map((card) => {
         const Icon = card.icon;
         return (
