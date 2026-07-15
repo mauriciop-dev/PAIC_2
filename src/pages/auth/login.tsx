@@ -20,9 +20,8 @@ export default function LoginPage() {
 
   const handleGoogle = async () => {
     setLoading(true);
-    const { error: err } = await insforge.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    const { error: err } = await insforge.auth.signInWithOAuth("google", {
+      redirectTo: `${window.location.origin}/auth/callback`,
     });
     if (err) { setError(err.message); setLoading(false); }
   };
