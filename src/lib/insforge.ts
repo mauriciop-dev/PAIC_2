@@ -8,6 +8,6 @@ export const insforge = createClient({
 export const adminInsforge = typeof window === "undefined"
   ? createAdminClient({
       baseUrl: process.env.NEXT_PUBLIC_INSFORGE_URL!,
-      apiKey: process.env.INSFORGE_API_KEY!,
+      apiKey: process.env.INSFORGE_SERVICE_ROLE_KEY!,
     })
   : null;
