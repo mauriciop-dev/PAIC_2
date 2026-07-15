@@ -9,7 +9,7 @@ export default function CallbackPage() {
     const { code, error: err } = router.query;
     if (err) { setError("Error de autenticación"); return; }
     if (!code) return;
-    insforge.auth.exchangeCodeForSession(code as string).then(({ error }) => {
+    insforge.auth.exchangeOAuthCode(code as string).then(({ error }) => {
       if (error) setError(error.message);
       else router.push("/dashboard");
     });
