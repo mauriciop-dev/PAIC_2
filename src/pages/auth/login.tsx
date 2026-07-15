@@ -13,7 +13,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error: err } = await insforge.auth.signInWithEmail({ email, password });
+    const { error: err } = await insforge.auth.signInWithPassword({ email, password });
     if (err) { setError(err.message); setLoading(false); return; }
     router.push("/dashboard");
   };
