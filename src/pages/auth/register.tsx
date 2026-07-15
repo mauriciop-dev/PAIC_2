@@ -14,7 +14,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error: err } = await insforge.auth.signUp({ email, password, options: { data: { full_name: name } } });
+    const { error: err } = await insforge.auth.signUp({ email, password, name });
     if (err) { setError(err.message); setLoading(false); return; }
     router.push("/auth/login?registered=true");
   };
