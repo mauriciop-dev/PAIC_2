@@ -6,8 +6,8 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
     async function check() {
-      const { data } = await insforge.auth.getSession();
-      if (data.session) router.push("/dashboard");
+      const { data } = await insforge.auth.getCurrentUser();
+      if (data.user) router.push("/dashboard");
       else router.push("/auth/login");
     }
     check();
