@@ -11,14 +11,15 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!actual) return;
+    const copropiedad = actual;
+    if (!copropiedad) return;
     async function loadStats() {
       try {
         const [residents, incomes, expenses, tasks] = await Promise.all([
-          adminInsforge!.database.from("residents").select("*", { count: "exact", head: true }).eq("conjunto_id", actual.id),
-          adminInsforge!.database.from("incomes").select("*", { count: "exact", head: true }).eq("conjunto_id", actual.id),
-          adminInsforge!.database.from("expenses").select("*", { count: "exact", head: true }).eq("conjunto_id", actual.id),
-          adminInsforge!.database.from("tasks").select("*", { count: "exact", head: true }).eq("conjunto_id", actual.id),
+          adminInsforge!.database.from("residents").select("*", { count: "exact", head: true }).eq("conjunto_id", copropiedad.id),
+          adminInsforge!.database.from("incomes").select("*", { count: "exact", head: true }).eq("conjunto_id", copropiedad.id),
+          adminInsforge!.database.from("expenses").select("*", { count: "exact", head: true }).eq("conjunto_id", copropiedad.id),
+          adminInsforge!.database.from("tasks").select("*", { count: "exact", head: true }).eq("conjunto_id", copropiedad.id),
         ]);
         setStats({
           residents: residents.count ?? 0,
