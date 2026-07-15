@@ -11,9 +11,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const copropiedad = actual;
-    if (!copropiedad) return;
     async function loadStats() {
+      const copropiedad = actual;
+      if (!copropiedad) { setLoading(false); return; }
       try {
         const [residents, incomes, expenses, tasks] = await Promise.all([
           adminInsforge!.database.from("residents").select("*", { count: "exact", head: true }).eq("conjunto_id", copropiedad.id),
