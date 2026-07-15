@@ -1,5 +1,5 @@
 [auth]
-allowed_redirect_urls = ["http://localhost:5173", "https://app.paicai.com.co", "https://paic-*.vercel.app", "https://paic-2.vercel.app"]
+allowed_redirect_urls = ["http://localhost:5173", "https://app.paicai.com.co", "https://paic-*.vercel.app", "https://paic-2-git-main-mauricios-projects-d3659c9b.vercel.app", "https://paic-2-git-main-mauricios-projects-d3659c9b.vercel.app/auth/callback", "https://paic-2.vercel.app", "https://paic-2.vercel.app/auth/callback"]
 require_email_verification = true
 verify_email_method = "code"
 reset_password_method = "code"
