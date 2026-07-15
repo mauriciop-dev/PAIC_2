@@ -6,10 +6,10 @@ export default function CallbackPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   useEffect(() => {
-    const { code, error: err } = router.query;
+    const { insforge_code, error: err } = router.query;
     if (err) { setError("Error de autenticación"); return; }
-    if (!code) return;
-    insforge.auth.exchangeOAuthCode(code as string).then(({ error }) => {
+    if (!insforge_code) return;
+    insforge.auth.exchangeOAuthCode(insforge_code as string).then(({ error }) => {
       if (error) setError(error.message);
       else router.push("/dashboard");
     });
