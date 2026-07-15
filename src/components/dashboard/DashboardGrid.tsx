@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GridLayout, { getCompactor } from "react-grid-layout";
+import GridLayout, { getCompactor, type LayoutItem } from "react-grid-layout";
 import { Users, DollarSign, CreditCard, CheckSquare } from "lucide-react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -13,7 +13,7 @@ const STAT_CARDS = [
   { key: "tasks", label: "Tareas", icon: CheckSquare, color: "bg-purple-500" },
 ];
 
-const layout = STAT_CARDS.map((c, i) => ({ i: c.key, x: (i % 2) * 3, y: Math.floor(i / 2) * 2, w: 3, h: 2, static: false }));
+const layout: LayoutItem[] = STAT_CARDS.map((c, i) => ({ i: c.key, x: (i % 2) * 3, y: Math.floor(i / 2) * 2, w: 3, h: 2, static: false }));
 
 export default function DashboardGrid({ stats, loading }: Props) {
   const [currentLayout, setCurrentLayout] = useState(layout);
