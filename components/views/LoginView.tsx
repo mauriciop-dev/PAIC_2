@@ -22,8 +22,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onInternalAuthSuccess }) => {
 
   const handleGoogleSignIn = async () => {
     setError(null);
-    const { error } = await insforge.auth.signInWithOAuth({
-      provider: 'google',
+    const { error } = await insforge.auth.signInWithOAuth('google', {
       redirectTo: window.location.origin,
     });
     if (error) setError(error.message);
