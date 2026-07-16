@@ -87,12 +87,12 @@ async function run() {
       { copropiedad_id: cid, tipo: 'apartamento', numero: '201', torre: 'A', piso: '2', area_m2: 90, propietario_nombre: 'Pedro López', propietario_documento: 'CC 456789123', propietario_email: 'pedro@email.com', propietario_telefono: '+57 300 333 4455' },
       { copropiedad_id: cid, tipo: 'apartamento', numero: '202', torre: 'A', piso: '2', area_m2: 80, propietario_nombre: 'María García', propietario_documento: 'CC 789123456', propietario_email: 'maria@email.com', propietario_telefono: '+57 300 444 5566' },
       { copropiedad_id: cid, tipo: 'apartamento', numero: '301', torre: 'A', piso: '3', area_m2: 95, propietario_nombre: 'Juan Martínez', propietario_documento: 'CC 321654987', propietario_email: 'juan@email.com', propietario_telefono: '+57 300 555 6677' },
-      { copropiedad_id: cid, tipo: 'casa', numero: '1', interior: 'Manzana B', area_m2: 150, propietario_nombre: 'Laura Sánchez', propietario_documento: 'CC 654987321', propietario_email: 'laura@email.com', propietario_telefono: '+57 300 666 7788' },
-      { copropiedad_id: cid, tipo: 'casa', numero: '2', interior: 'Manzana B', area_m2: 140, propietario_nombre: 'Diego Torres', propietario_documento: 'CC 147258369', propietario_email: 'diego@email.com', propietario_telefono: '+57 300 777 8899' },
-      { copropiedad_id: cid, tipo: 'local_comercial', numero: 'LC-01', piso: '1', area_m2: 60, propietario_nombre: 'Comercial XYZ SAS', propietario_documento: 'NIT 900123456', propietario_email: 'comercial@xyz.com', propietario_telefono: '+57 601 888 9900' },
-      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PA1', torre: 'A', piso: 'Sótano', area_m2: 12 },
-      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PB2', torre: 'B', piso: 'Sótano', area_m2: 12 },
-      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PC3', torre: 'C', piso: 'Sótano', area_m2: 15 },
+      { copropiedad_id: cid, tipo: 'apartamento', numero: '1', interior: 'Manzana B', area_m2: 150, propietario_nombre: 'Laura Sánchez', propietario_documento: 'CC 654987321', propietario_email: 'laura@email.com', propietario_telefono: '+57 300 666 7788' },
+      { copropiedad_id: cid, tipo: 'apartamento', numero: '2', interior: 'Manzana B', area_m2: 140, propietario_nombre: 'Diego Torres', propietario_documento: 'CC 147258369', propietario_email: 'diego@email.com', propietario_telefono: '+57 300 777 8899' },
+      { copropiedad_id: cid, tipo: 'local', numero: 'LC-01', piso: '1', area_m2: 60, propietario_nombre: 'Comercial XYZ SAS', propietario_documento: 'NIT 900123456', propietario_email: 'comercial@xyz.com', propietario_telefono: '+57 601 888 9900' },
+      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PA1', torre: 'A', piso: 'Sb', area_m2: 12 },
+      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PB2', torre: 'B', piso: 'Sb', area_m2: 12 },
+      { copropiedad_id: cid, tipo: 'parqueadero', numero: 'PC3', torre: 'C', piso: 'Sb', area_m2: 15 },
     ])
     .select();
   if (uErr) throw uErr;
