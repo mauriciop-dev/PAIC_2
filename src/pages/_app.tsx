@@ -20,9 +20,11 @@ export default function App({ Component, pageProps }: AppProps) {
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           </>
         )}
-        <main className={!isAuth ? "pt-16" : ""}>
-          <Component {...pageProps} />
-        </main>
+        <div className={!isAuth ? "pt-16 lg:ml-64" : ""}>
+          <main>
+            <Component {...pageProps} />
+          </main>
+        </div>
         <ChatWidget />
       </div>
     </CopropiedadProvider>

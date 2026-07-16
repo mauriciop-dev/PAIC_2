@@ -33,8 +33,8 @@ export default function MultiCopropiedadPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {conjuntos.map(c => (
           <div key={c.id} className={"bg-white rounded-xl shadow-sm border p-5 cursor-pointer transition hover:shadow-md " + (actual?.id === c.id ? "ring-2 ring-blue-500" : "")} onClick={() => setActual(c)}>
-            <h3 className="font-semibold text-lg">{c.nombre}</h3>
-            <p className="text-sm text-gray-500">{c.ciudad}</p>
+            <h3 className="font-semibold text-lg">{c.name}</h3>
+            <p className="text-sm text-gray-500">{c.address ?? ""}</p>
             <div className="mt-3 flex gap-3 text-sm text-gray-600">
               <span>{stats[c.id]?.residents ?? "..."} residentes</span>
               <span>{stats[c.id]?.incomes ?? "..."} ingresos</span>

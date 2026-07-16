@@ -8,9 +8,7 @@ export const insforge = createClient({
   anonKey,
 });
 
-export const adminInsforge = typeof window === "undefined"
-  ? createAdminClient({
-      baseUrl,
-      apiKey: process.env.INSFORGE_API_KEY || process.env.INSFORGE_SERVICE_ROLE_KEY || 'ik_0c583c8afce18d60e07b27074f62d368',
-    })
-  : null;
+export const adminInsforge = createAdminClient({
+  baseUrl,
+  apiKey: process.env.INSFORGE_API_KEY || process.env.INSFORGE_SERVICE_ROLE_KEY || 'ik_0c583c8afce18d60e07b27074f62d368',
+});

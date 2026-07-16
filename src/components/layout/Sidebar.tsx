@@ -23,12 +23,12 @@ export default function Sidebar({ isOpen, onClose }: Props) {
   return (
     <>
       {isOpen && <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={onClose} />}
-      <aside className={"fixed top-16 left-0 bottom-0 w-64 bg-white border-r z-50 transform transition-transform lg:translate-x-0 lg:static lg:z-auto overflow-y-auto " + (isOpen ? "translate-x-0" : "-translate-x-full")}>
+      <aside className={"fixed top-16 left-0 bottom-0 w-64 bg-white border-r z-50 transform transition-transform lg:translate-x-0 overflow-y-auto " + (isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="p-4">
           {lista.length > 1 && (
             <div className="mb-4">
               <select value={actual?.id ?? ""} onChange={(e) => setActual(lista.find((c) => c.id === e.target.value)!)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                {lista.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                {lista.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
           )}

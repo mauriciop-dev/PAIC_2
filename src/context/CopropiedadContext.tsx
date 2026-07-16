@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 
-type Copropiedad = { id: string; nombre: string; direccion?: string; ciudad?: string; subscription_plan?: string; role?: string };
+type Copropiedad = { id: string; name: string; address?: string; ciudad?: string; subscription_plan?: string; role?: string };
 type CopropiedadCtx = { actual: Copropiedad | null; lista: Copropiedad[]; loading: boolean; setActual: (c: Copropiedad) => void; refresh: () => Promise<void> };
 
 const Context = createContext<CopropiedadCtx>({ actual: null, lista: [], loading: true, setActual: () => {}, refresh: async () => {} });
