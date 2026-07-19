@@ -20,3 +20,36 @@ Key patterns:
 - Reference users with `auth.users(id)`; use `auth.uid()` in RLS policies.
 - For storage uploads, persist both the returned `url` and `key`.
 <!-- INSFORGE:END -->
+
+## MateriaProgramable — Flujo de publicación de artículos
+
+### Procesar un artículo nuevo
+
+Cuando el usuario diga **"procesa el archivo"** o similar, seguir este flujo:
+
+1. **Leer el .txt** desde `materiaprogramable/_articulos_text_plano/` (o la ruta que indique)
+2. **Extraer metadatos** del contenido: título, descripción, fecha, categoría, etc.
+3. **Crear el .md** en `materiaprogramable/src/content/blog/` con frontmatter completo:
+   - `title`, `description`, `pubDate`, `category`, `lang`, `translationOf` (si aplica)
+   - `animation:` block según la temática del artículo
+4. **Generar imagen hero** ejecutando:
+   ```
+   python tools/generate_article_image.py "<title>" "<description>" "<content_preview>"
+   ```
+   El script intenta **Gemini API** primero; si falla, hace **fallback a HuggingFace FLUX.1-schnell**.
+   Si la imagen se genera, actualizar el frontmatter con `heroImage: /media/<filename>` y `ogImage: <filename>`.
+   Si ambos métodos fallan, publicar sin imagen.
+5. **Crear traducción EN** con `tools/translate.mjs` si aplica (requiere `GEMINI_API_KEY`)
+6. **Verificar build**: `npx astro build` en `materiaprogramable/`
+7. **Commit y push** a GitHub
+
+### Environment variables (`.env` en `materiaprogramable/`)
+
+| Variable | Propósito |
+|---|---|
+| `GEMINI_API_KEY` | Imagen hero (primario) + traducción EN |
+| `HF_API_KEY` | Imagen hero (fallback con FLUX.1-schnell) |
+
+### Plan B (fallback imagen)
+
+Si Gemini falla al generar la imagen, el script `generate_article_image.py` automáticamente usa HuggingFace. Si ambos fallan, se publica sin imagen (como se hacía antes).
